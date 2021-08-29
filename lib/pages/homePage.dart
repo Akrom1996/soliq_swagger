@@ -1,11 +1,6 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:soliq_swagger/pages/AddingPage.dart';
-import 'package:soliq_swagger/pages/DetailPage.dart';
-import 'package:soliq_swagger/pages/Products.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,176 +10,334 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // List<Products>? data1;
-  TextEditingController? textEditingController;
-  String jwt =
-      "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNUM4MDVFRkIzODE0NzI2QUM5RjU5Q0YyRjlGRTQwNSIsImV4cCI6MTYyOTg3MjAzOCwiaWF0IjoxNjI5ODU0MDM4fQ.72kW1tPR_yNBoREcowKkwpGhewsMaQyl3qpgamQn07VU3D66cZNvibkXKak9rFSrdCXa6791CV5q90BUWCpYNg";
-  String uri = "https://api-tasnif.soliq.uz/cl-api/company-products/by-params";
-
-  Future loadData() async {
-    // print("loading");
-    var response = await http.get(
-      Uri.parse(uri),
-      headers: {
-        "Authorization": jwt,
-      },
-    );
-    var resData = json.decode(utf8.decode(response.bodyBytes))['data'];
-    var data1 = resData.map((data) => Products.fromJson(data)).toList();
-    // print(data1);
-    return data1;
-  }
-
-  Future filterDataByName(String name) async {
-    var response = await http.get(
-      Uri.parse(uri),
-      headers: {"Authorization": jwt, 'Content-Type': 'application/json'},
-    );
-    var resData = json.decode(utf8.decode(response.bodyBytes))['data'];
-    // print(resData);
-    var data1 = resData.map((data) => Products.fromJson(data)).toList();
-    // print("start ${data1.length}");
-    List<Products> data2 = [];
-    print(data1.map((e) {
-      // print(name);
-      if (e.className.toString().toLowerCase().contains(name)) {
-        // print(e.className);
-        data2.add(e);
-      }
-    }));
-
-    // data2 = data1
-    //     .where((element) => element.className.toString().contains(name))
-    //     .toList();
-    // print("data2: $data2");
-    return data2;
-  }
-
-  Future? myFuture;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    myFuture = loadData();
-    textEditingController = TextEditingController();
-  }
-
+  int currentIndex = 0;
+  Color mainColor = Color(0xff325ECD);
+  Color greyColor = Color(0xff8D959E);
+  List<String> years = ["2021", "2020", "2019"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.teal[200],
-        elevation: 0,
-        title: Text(
-          "Soliq.uz",
-          style: TextStyle(color: Colors.white, fontSize: 18),
+        backgroundColor: Colors.grey[200],
+        leading: Icon(
+          Icons.arrow_back_sharp,
+          color: mainColor,
         ),
-      ),
-      body: Container(
-        width: double.infinity,
-        child: Column(
+        centerTitle: true,
+        elevation: 0,
+        title: Column(
           children: [
-            Container(
-              // height: 30,
-              margin: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-              child: TextField(
-                onChanged: (txt) {
-                  setState(() {
-                    myFuture = txt == "" ? loadData() : filterDataByName(txt);
-                  });
-                },
-                cursorColor: Colors.teal[300],
-                style: TextStyle(
-                    color: Colors.teal,
-                    letterSpacing: 1.1,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400),
-                // controller: textEditingController,
-                decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.search_sharp,
-                      color: Colors.teal[300],
-                    ),
-                    hintText: "Search",
-                    hintStyle: TextStyle(color: Colors.teal[300]),
-                    hoverColor: Colors.teal[300],
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal[300]!),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
-            ),
-            Expanded(
-                child: FutureBuilder(
-              future: myFuture,
-              builder: (context, AsyncSnapshot snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text("${snapshot.error}"),
-                  );
-                } else if (snapshot.hasData) {
-                  var data = snapshot.data;
-                  return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: ListView.builder(
-                        itemCount: data!.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: InkWell(
-                              onTap: () async {
-                                var result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        DetailPage(product: data[index]),
-                                  ),
-                                );
-                                if (result == 200)
-                                  setState(() {
-                                    myFuture = loadData();
-                                  });
-                              },
-                              child: ListTile(
-                                title: Text(
-                                  "${data[index].className}",
-                                ),
-                                subtitle: Text("${data[index].createdAt}"),
-                                trailing: Icon(Icons.arrow_forward_ios),
-                              ),
-                            ),
-                          );
-                        }),
-                  );
-                }
-                return Center(
-                  child: SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-            ))
+            Text("Мои доходы",
+                style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
+                    fontSize: 12)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "806 600 000",
+                  style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      color: mainColor,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 2,
+                ),
+                Text('сӯм',
+                    style: GoogleFonts.ptSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: mainColor))
+              ],
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddItem(),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(bottom: 0),
+                height: 40,
+                // width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      height: 36,
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      child: ListView.builder(
+                        itemCount: 3,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: EdgeInsets.only(right: 30),
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  currentIndex = index;
+                                });
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${years[index]}",
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: currentIndex == index
+                                            ? mainColor
+                                            : greyColor),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: 12, bottom: 0),
+                                    height: currentIndex == index ? 2 : 0,
+                                    width: 66,
+                                    color: mainColor,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Divider(
+                      height: 0,
+                      thickness: 1,
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                height: 214,
+                width: double.infinity,
+                margin: EdgeInsets.fromLTRB(16, 21, 16, 16),
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "ГУП Государственный центр экспертизы и стандартизации лекарственных средств",
+                      style: GoogleFonts.ptSans(
+                          fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    MyRow(
+                      text1: "Начисленная зарплата",
+                      text2: "999 157 894.00",
+                      text3: "сӯм",
+                    ),
+                    MyRow(
+                      text1: "Налог на доходы (НДФЛ 12%)",
+                      text2: "888 613 789.39",
+                      text3: "сӯм",
+                    ),
+                    MyRow(
+                      text1: "Отработанных месяцев",
+                      text2: "2",
+                      text3: "",
+                    ),
+                    MyRow(
+                      text1: "Сумма на пенсионный счет (ИНПС)",
+                      text2: "613 789.39",
+                      text3: "сӯм",
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 1,
+                      color: Colors.grey.withOpacity(0.4),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.calendar_view_week,
+                          color: mainColor,
+                          size: 13.3,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "Показать по месяцам",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Spacer(),
+                        SvgPicture.asset(
+                          "assets/images/image.svg",
+                          color: mainColor,
+                        ),
+                        SizedBox(
+                          width: 2,
+                        ),
+                        Text(
+                          "Скачать",
+                          style: GoogleFonts.montserrat(
+                              fontSize: 12, fontWeight: FontWeight.w400),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                height: 214,
+                width: double.infinity,
+                margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "ГУП Государственный центр экспертизы и стандартизации лекарственных средств",
+                      style: GoogleFonts.ptSans(
+                          fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    MyRow(
+                      text1: "Начисленная зарплата",
+                      text2: "999 157 894.00",
+                      text3: "сӯм",
+                    ),
+                    MyRow(
+                      text1: "Налог на доходы (НДФЛ 12%)",
+                      text2: "888 613 789.39",
+                      text3: "сӯм",
+                    ),
+                    MyRow(
+                      text1: "Отработанных месяцев",
+                      text2: "2",
+                      text3: "",
+                    ),
+                    MyRow(
+                      text1: "Сумма на пенсионный счет (ИНПС)",
+                      text2: "613 789.39",
+                      text3: "сӯм",
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 1,
+                      color: Colors.grey.withOpacity(0.4),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.calendar_view_week,
+                          color: mainColor,
+                          size: 13.3,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "Показать по месяцам",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Spacer(),
+                        SvgPicture.asset(
+                          "assets/images/image.svg",
+                          color: mainColor,
+                        ),
+                        SizedBox(
+                          width: 2,
+                        ),
+                        Text(
+                          "Скачать",
+                          style: GoogleFonts.montserrat(
+                              fontSize: 12, fontWeight: FontWeight.w400),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration:
+                      BoxDecoration(shape: BoxShape.circle, color: mainColor),
+                  child: Icon(
+                    Icons.filter_alt_outlined,
+                    color: Colors.white,
+                  )
+                  // SvgPicture.asset(
+                  //   "assets/images/image2.svg",
+                  //   color: Colors.white,
+                  //   width: 2,
+                  //   height: 2,
+                  // ),
+                  ),
             ),
-          );
-          if (result == 200)
-            setState(() {
-              myFuture = loadData();
-            });
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.teal[300],
+          )
+        ],
       ),
+    );
+  }
+}
+
+class MyRow extends StatelessWidget {
+  final text1;
+  final text2;
+  final text3;
+  const MyRow({
+    Key? key,
+    required this.text1,
+    required this.text2,
+    required this.text3,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          "$text1",
+          style: GoogleFonts.ptSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            // height: 16,
+          ),
+        ),
+        Spacer(),
+        Text(
+          "$text2",
+          style: GoogleFonts.ptSans(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+        text3 == ""
+            ? SizedBox.shrink()
+            : SizedBox(
+                width: 4,
+              ),
+        Text(
+          "$text3",
+          style: GoogleFonts.ptSans(fontSize: 12, fontWeight: FontWeight.w400),
+        )
+      ],
     );
   }
 }
